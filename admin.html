@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Domvex | Super Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #0b0f17; color: white; padding: 20px; }
+        
+        /* Login Screen */
+        #loginUI { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
+        .login-box { background: #111827; padding: 40px; border-radius: 12px; border: 1px solid #1f2937; text-align: center; }
+        input { padding: 12px; margin: 10px 0; width: 250px; background: #1f2937; border: 1px solid #374151; color: white; border-radius: 6px; }
+        button { padding: 12px 24px; background: #00d2ff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
+
+        /* Dashboard Styles */
+        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .metric-card { background: #111827; padding: 25px; border-radius: 12px; border: 1px solid #1f2937; text-align: center; }
+        table { width: 100%; border-collapse: collapse; background: #111827; border-radius: 12px; overflow: hidden; }
+        th { background: #1f2937; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #1f2937; }
+        .cancel-btn { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box" id="loginUI">
+        <h2>Admin Verification</h2>
+        <input type="tel" id="adminPhone" placeholder="Enter Admin Number" maxlength="10">
+        <button onclick="checkAuth()">Login to Dashboard</button>
+    </div>
+
+    <div id="dashboardUI" style="display:none;">
+        <header style="display:flex; justify-content:space-between; margin-bottom: 20px;">
+            <h1>System Overview</h1>
+            <button onclick="location.reload()" style="width: auto; background: #ef4444;">Logout</button>
+        </header>
+
+        <div class="metrics-grid">
+            <div class="metric-card"><h3>Customers</h3><div id="countCustomers" style="font-size: 30px;">0</div></div>
+            <div class="metric-card"><h3>Workers</h3><div id="countWorkers" style="font-size: 30px;">0</div></div>
+            <div class="metric-card"><h3>Bookings</h3><div id="countBookings" style="font-size: 30px;">0</div></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr><th>Booking ID</th><th>Customer</th><th>Service</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody id="adminTableBody"></tbody>
+        </table>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCpoTdWajiA1rjX6AzIJ10hZ_EkW5YrmNE",
+            databaseURL: "https://domvex-45097-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function checkAuth() {
+            const phone = document.getElementById('adminPhone').value;
+            if(phone === "7878463369") {
+                document.getElementById('loginUI').style.display = 'none';
+                document.getElementById('dashboardUI').style.display = 'block';
+                loadData();
+            } else {
+                alert("Bhai, tu Admin nahi hai!");
+            }
+        }
+
+        function loadData() {
+            // Metrics
+            database.ref('users').on('value', snap => document.getElementById('countCustomers').innerText = snap.exists() ? Object.keys(snap.val()).length : 0);
+            database.ref('workers').on('value', snap => document.getElementById('countWorkers').innerText = snap.exists() ? Object.keys(snap.val()).length : 0);
+            
+            // Table
+            database.ref('bookings').on('value', snap => {
+                const tbody = document.getElementById('adminTableBody');
+                tbody.innerHTML = '';
+                let count = 0;
+                if(snap.exists()) {
+                    snap.forEach(child => {
+                        count++;
+                        const b = child.val();
+                        tbody.innerHTML += `<tr>
+                            <td>${b.bookingId}</td>
+                            <td>${b.customerName}</td>
+                            <td>${b.service}</td>
+                            <td>${b.status}</td>
+                            <td><button class="cancel-btn" onclick="del('${child.key}')">Delete</button></td>
+                        </tr>`;
+                    });
+                }
+                document.getElementById('countBookings').innerText = count;
+            });
+        }
+
+        function del(key) {
+            if(confirm("Delete karna hai?")) database.ref('bookings/' + key).remove();
+        }
+    </script>
+</body>
+</html>
