@@ -77,6 +77,16 @@
         .cust-submit { background: #0284c7; color: white; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); }
         .work-submit { background: #6d28d9; color: white; box-shadow: 0 4px 12px rgba(109, 40, 217, 0.2); }
         .toggle-form-text { display: block; text-align: center; margin-top: 15px; font-size: 12px; color: #64748b; cursor: pointer; }
+
+        /* RESPONSIVE CSS */
+        @media (max-width: 768px) {
+            .hero-banner { height: 400px; }
+            .hero-banner h2 { font-size: 28px; }
+            .services-quick-grid { margin-top: -30px; gap: 10px; }
+            .quick-box { width: 100px; height: 90px; }
+            .promo-banner-card { flex-direction: column; text-align: center; gap: 10px; }
+            .trending-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -118,6 +128,10 @@
         <a href="service.html" class="quick-box" data-tags="cleaning bathroom sofa deep clean home wash room kitchen chimney dust cleaning">
             <div class="icon" style="color: #ff9100;">🧹</div>
             <span>Cleaning</span>
+        </a>
+        <a href="service.html" class="quick-box" data-tags="beauty spa makeup salon grooming">
+            <div class="icon" style="color: #ff69b4;">💄</div>
+            <span>Beauty/Spa</span>
         </a>
         <a href="service.html" class="quick-box" data-tags="painting wall paint home color putty texture painter wall repair">
             <div class="icon" style="color: #ffea00;">🎨</div>
@@ -209,6 +223,7 @@
                         <option value="Plumber">Plumber</option>
                         <option value="AC Technician">AC Technician</option>
                         <option value="Cleaning Expert">Cleaning Expert</option>
+                        <option value="Beauty/Spa">Beauty/Spa</option>
                     </select>
                 </div>
                 <div class="form-group"><label>Create Password</label><input type="password" id="workerPassInput" required></div>
@@ -220,12 +235,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // CONFIG & DB
         const firebaseConfig = { apiKey: "AIzaSyCpoTdWajiA1rjX6AzIJ10hZ_EkW5YrmNE", authDomain: "domvex-45097.firebaseapp.com", databaseURL: "https://domvex-45097-default-rtdb.firebaseio.com/", projectId: "domvex-45097", storageBucket: "domvex-45097.firebasestorage.app", messagingSenderId: "317471334986", appId: "1:317471334986:web:c9f1a80e93ad1f13c93cb3" };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
 
-        // 1. AUTH CHECK ON LOAD
         window.onload = function() {
             const custName = localStorage.getItem('customerName');
             const navButtons = document.getElementById('navAuthButtons');
@@ -235,7 +248,6 @@
             }
         };
 
-        // 2. SEARCH LOGIC
         function filterServices() {
             var query = document.getElementById('searchInput').value.toLowerCase();
             document.querySelectorAll('.trending-card, .quick-box').forEach(el => {
@@ -244,7 +256,6 @@
             });
         }
 
-        // 3. LOGIN & SIGNUP
         document.getElementById('customerLoginForm').onsubmit = function(e) {
             e.preventDefault();
             const phone = document.getElementById('custLogPhone').value;
@@ -252,7 +263,8 @@
             database.ref('customers/' + phone).once('value', (s) => {
                 if (s.exists() && s.val().password === pass) {
                     localStorage.setItem('customerName', s.val().name);
-                    location.reload();
+                    localStorage.setItem('customerPhone', phone);
+                    window.location.href = 'service.html';
                 } else { alert('Invalid credentials!'); }
             });
         };
@@ -268,7 +280,6 @@
             });
         };
 
-        // 4. UTILS
         function logout() { localStorage.clear(); location.reload(); }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }

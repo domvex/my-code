@@ -31,7 +31,7 @@
             messagingSenderId: "317471334986",
             appId: "1:317471334986:web:c9f1a80e93ad1f13c93cb3"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
 
         window.onload = function() {
@@ -49,7 +49,7 @@
                         <div class="booking-card">
                             <p><strong>Service:</strong> ${data.service}</p>
                             <p><strong>Booking ID:</strong> ${data.bookingId}</p>
-                            <p><strong>Status:</strong> <span class="status-badge ${data.status.toLowerCase()}">${data.status}</span></p>
+                            <p><strong>Status:</strong> <span class="status-badge ${data.status ? data.status.toLowerCase() : 'pending'}">${data.status || 'Pending'}</span></p>
                             <p><small>${data.timestamp}</small></p>
                         </div>`;
                 });
