@@ -6,18 +6,25 @@
     <title>My Bookings - Domvex</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #0b0f17; color: white; padding: 30px; }
-        h1 { color: #00d2ff; text-align: center; margin-bottom: 30px; }
-        .booking-card { background: #111827; border: 1px solid #1f2937; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
-        .status-badge { padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 12px; }
-        .pending { background: #fbbf24; color: #000; }
-        .accepted { background: #10b981; color: #fff; }
+        body { background-color: #0b0f17; color: white; padding: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 5%; border-bottom: 1px solid #1f2937; margin-bottom: 30px; }
+        .booking-card { background: #111827; border: 1px solid #1f2937; padding: 20px; border-radius: 12px; margin-bottom: 15px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .status-pending { color: #f59e0b; font-weight: bold; }
+        .status-accepted { color: #10b981; font-weight: bold; }
+        h2 { text-align: center; margin-bottom: 20px; }
+        .back-btn { background: #374151; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <h1>My Bookings</h1>
-    <div id="myBookingsList">Loading your bookings...</div>
+    <header>
+        <h1>My Bookings</h1>
+        <button class="back-btn" onclick="window.location.href='service.html'">Back to Service</button>
+    </header>
+
+    <div id="bookingsList">
+        <h2 id="loadingMsg">Loading your bookings...</h2>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -34,27 +41,35 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
 
-        window.onload = function() {
-            const phone = localStorage.getItem('customerPhone');
-            if(!phone) { window.location.href = 'index.html'; return; }
+        const phone = localStorage.getItem('customerPhone');
+        const container = document.getElementById('bookingsList');
 
-            database.ref('bookings').orderByChild('phone').equalTo(phone).on('value', (snap) => {
-                const list = document.getElementById('myBookingsList');
-                list.innerHTML = '';
-                if(!snap.exists()) { list.innerHTML = '<p style="text-align:center;">No bookings found.</p>'; return; }
+        // Fetch bookings for the logged-in user
+        database.ref('bookings').orderByChild('customerPhone').equalTo(phone).on('value', (snapshot) => {
+            container.innerHTML = "";
+            if(!snapshot.exists()) {
+                container.innerHTML = "<h2 style='color:#666;'>No bookings found.</h2>";
+                return;
+            }
+
+            snapshot.forEach((child) => {
+                const b = child.val();
+                const isAccepted = b.status === "Accepted";
                 
-                snap.forEach((child) => {
-                    const data = child.val();
-                    list.innerHTML += `
-                        <div class="booking-card">
-                            <p><strong>Service:</strong> ${data.service}</p>
-                            <p><strong>Booking ID:</strong> ${data.bookingId}</p>
-                            <p><strong>Status:</strong> <span class="status-badge ${data.status ? data.status.toLowerCase() : 'pending'}">${data.status || 'Pending'}</span></p>
-                            <p><small>${data.timestamp}</small></p>
-                        </div>`;
-                });
+                const card = document.createElement('div');
+                card.className = 'booking-card';
+                card.innerHTML = `
+                    <h3>Service: ${b.service}</h3>
+                    <p>Booking ID: ${b.bookingId}</p>
+                    <p>Address: ${b.address}</p>
+                    <p>Status: <span class="${isAccepted ? 'status-accepted' : 'status-pending'}">${b.status}</span></p>
+                    <p style="margin-top:10px; font-size: 0.9em; color: #9ca3af;">
+                        ${isAccepted ? "Your booking has been accepted! An expert will reach your doorstep soon." : "Your booking is pending. Please wait for an expert to accept."}
+                    </p>
+                `;
+                container.appendChild(card);
             });
-        };
+        });
     </script>
 </body>
 </html>

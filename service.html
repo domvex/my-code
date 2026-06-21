@@ -26,7 +26,7 @@
     <header>
         <div class="logo-text"><h1 id="welcomeTitle">DOMVEX</h1></div>
         <div class="nav-actions">
-            <button class="bookings-btn" onclick="window.location.href='my-bookings.html'">My Bookings</button>
+            <button class="bookings-btn" onclick="window.location.href='customer_dashboard.html'">My Bookings</button>
             <button class="logout-btn" onclick="logout()">Log Out</button>
         </div>
     </header>
@@ -83,6 +83,20 @@
             } else {
                 document.getElementById('welcomeTitle').innerText = "DOMVEX - Hi, " + name;
                 document.getElementById('bookPhone').value = phone;
+                // GPS update call
+                requestLocation(phone);
+            }
+        }
+
+        // GPS Location Function
+        function requestLocation(phone) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    database.ref('users/' + phone).update({
+                        lastLat: pos.coords.latitude,
+                        lastLng: pos.coords.longitude
+                    });
+                });
             }
         }
 
@@ -97,15 +111,15 @@
             database.ref('bookings/' + bookingId).set({
                 bookingId: bookingId,
                 customerName: name,
-                phone: phone,
+                customerPhone: phone,
                 service: service,
                 address: address,
                 timestamp: new Date().toLocaleString(),
                 status: "Pending"
             }, function(err) {
                 if(!err) {
-                    alert('🚀 Booking Confirmed! ID: ' + bookingId);
-                    window.location.href = 'my-bookings.html';
+                    alert('🚀 Booking Confirmed! Your booking is now pending. We will notify you once accepted.');
+                    window.location.href = 'customer_dashboard.html';
                 }
             });
         };

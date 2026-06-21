@@ -16,8 +16,10 @@
         .status-pending { color: #fbbf24; font-weight: bold; }
         .status-accepted { color: #10b981; font-weight: bold; }
         .status-completed { color: #6366f1; font-weight: bold; }
-        .action-btn { background: #00d2ff; color: #0b0f17; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; margin-right: 5px; }
+        .action-btn { background: #00d2ff; color: #0b0f17; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; margin-right: 5px; text-decoration: none; display: inline-block; }
         .complete-btn { background: #10b981; color: white; }
+        .call-btn { background: #f59e0b; color: white; }
+        .rating-box { background: #1f2937; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #f59e0b; text-align: center; }
     </style>
 </head>
 <body>
@@ -29,11 +31,15 @@
     
     <div class="grid-container">
         <div class="panel">
-            <h2 style="color: #00d2ff;">🛒 Live Booking Requests</h2>
-            <div id="liveBookings">Loading...</div>
+            <div class="rating-box">
+                <h2 style="color: #f59e0b;">⭐ My Average Rating</h2>
+                <h1 id="myRating">0.0</h1>
+            </div>
+            <h2 style="color: #00d2ff;">🛒 My Bookings</h2>
+            <div id="liveBookings">Loading your services...</div>
         </div>
         <div class="panel">
-            <h2 style="color: #9b51e0;">👷 Expert Network</h2>
+            <h2 style="color: #9b51e0;">👷 Active Expert Network</h2>
             <div id="liveWorkers">Loading...</div>
         </div>
     </div>
@@ -41,14 +47,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // Security Check
-        window.onload = function() {
-            if (!localStorage.getItem('workerPhone')) {
-                alert("Access Denied! Login required.");
-                window.location.href = 'index.html';
-            }
-        };
-
         const firebaseConfig = {
             apiKey: "AIzaSyCpoTdWajiA1rjX6AzIJ10hZ_EkW5YrmNE",
             authDomain: "domvex-45097.firebaseapp.com",
@@ -61,26 +59,71 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Realtime Bookings
-        database.ref('bookings').on('value', (snap) => {
-            const container = document.getElementById('liveBookings');
-            container.innerHTML = '';
-            snap.forEach((child) => {
-                const data = child.val();
-                container.innerHTML += `
-                    <div class="card">
-                        <p><strong>ID:</strong> ${data.bookingId} <span class="status-${data.status.toLowerCase()}">[${data.status}]</span></p>
-                        <p><strong>Customer:</strong> ${data.customerName}</p>
-                        <p><strong>Service:</strong> ${data.service}</p>
-                        <p><strong>Address:</strong> ${data.address}</p>
-                        ${data.status === 'Pending' ? `<button class="action-btn" onclick="updateStatus('${data.bookingId}', 'Accepted')">Accept</button>` : ''}
-                        ${data.status === 'Accepted' ? `<button class="action-btn complete-btn" onclick="updateStatus('${data.bookingId}', 'Completed')">Complete</button>` : ''}
-                    </div>`;
+        let mySkill = "";
+        const phone = localStorage.getItem('workerPhone');
+
+        window.onload = function() {
+            if (!phone) {
+                alert("Access Denied! Login required.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            database.ref('workers/' + phone).once('value', (snap) => {
+                if(snap.exists()) {
+                    mySkill = snap.val().skill;
+                    loadBookings();
+                    loadRating();
+                }
             });
-        });
+        };
+
+        function loadRating() {
+            database.ref('workers/' + phone + '/ratings').on('value', (snap) => {
+                let total = 0, count = 0;
+                snap.forEach(r => { 
+                    total += parseInt(r.val().rating); 
+                    count++; 
+                });
+                document.getElementById('myRating').innerText = count > 0 ? (total/count).toFixed(1) : "0.0";
+            });
+        }
+
+        function loadBookings() {
+            database.ref('bookings').on('value', (snap) => {
+                const container = document.getElementById('liveBookings');
+                container.innerHTML = '';
+                let found = false;
+
+                snap.forEach((child) => {
+                    const data = child.val();
+                    const isMyAccepted = (data.status === 'Accepted' && data.acceptedBy === phone);
+                    const isAvailable = (data.status === 'Pending' && data.service === mySkill);
+
+                    if(isMyAccepted || isAvailable) {
+                        found = true;
+                        container.innerHTML += `
+                            <div class="card">
+                                <p><strong>ID:</strong> ${data.bookingId} <span class="status-${data.status.toLowerCase()}">[${data.status}]</span></p>
+                                <p><strong>Customer:</strong> ${data.customerName}</p>
+                                <p><strong>Service:</strong> ${data.service}</p>
+                                <p><strong>Address:</strong> ${data.address}</p>
+                                ${isMyAccepted ? `<p><strong>Customer No:</strong> ${data.customerPhone}</p> <a href="tel:${data.customerPhone}" class="action-btn call-btn">Call Customer</a>` : ''}
+                                ${data.status === 'Pending' ? `<button class="action-btn" onclick="updateStatus('${data.bookingId}', 'Accepted')">Accept</button>` : ''}
+                                ${isMyAccepted ? `<button class="action-btn complete-btn" onclick="updateStatus('${data.bookingId}', 'Completed')">Complete</button>` : ''}
+                            </div>`;
+                    }
+                });
+                if(!found) container.innerHTML = '<p>No bookings available for you.</p>';
+            });
+        }
 
         function updateStatus(id, newStatus) {
-            database.ref('bookings/' + id).update({ status: newStatus });
+            const updates = { status: newStatus };
+            if(newStatus === 'Accepted') {
+                updates.acceptedBy = phone; 
+            }
+            database.ref('bookings/' + id).update(updates);
         }
 
         function logout() {
@@ -88,7 +131,6 @@
             window.location.href = 'index.html';
         }
 
-        // Realtime Workers
         database.ref('workers').on('value', (snap) => {
             const container = document.getElementById('liveWorkers');
             container.innerHTML = '';
