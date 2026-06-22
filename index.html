@@ -113,31 +113,31 @@
     </div>
 
     <div class="services-quick-grid" id="categoryGrid">
-        <a href="service.html" class="quick-box" data-tags="electrician wiring switch fan light bulb socket board repair">
+        <a href="service.html?service=Electrician" class="quick-box">
             <div class="icon" style="color: #ffb400;">⚡</div>
             <span>Electrician</span>
         </a>
-        <a href="service.html" class="quick-box" data-tags="plumber nal repair tap leak pipe water wash basin jet spray flush tank leakage">
+        <a href="service.html?service=Plumber" class="quick-box">
             <div class="icon" style="color: #2d8eff;">🚰</div>
             <span>Plumber</span>
         </a>
-        <a href="service.html" class="quick-box" data-tags="ac repair gas foam jet servicing split window ac cooling filter installation">
+        <a href="service.html?service=AC Repair" class="quick-box">
             <div class="icon" style="color: #00e5ff;">❄️</div>
             <span>AC Repair</span>
         </a>
-        <a href="service.html" class="quick-box" data-tags="cleaning bathroom sofa deep clean home wash room kitchen chimney dust cleaning">
+        <a href="service.html?service=Cleaning" class="quick-box">
             <div class="icon" style="color: #ff9100;">🧹</div>
             <span>Cleaning</span>
         </a>
-        <a href="service.html" class="quick-box" data-tags="beauty spa makeup salon grooming">
+        <a href="service.html?service=Beauty/Spa" class="quick-box">
             <div class="icon" style="color: #ff69b4;">💄</div>
             <span>Beauty/Spa</span>
         </a>
-        <a href="service.html" class="quick-box" data-tags="painting wall paint home color putty texture painter wall repair">
+        <a href="service.html?service=Painting" class="quick-box">
             <div class="icon" style="color: #ffea00;">🎨</div>
             <span>Painting</span>
         </a>
-        <a href="service.html" class="quick-box" data-tags="laptop repair computer windows mac screen button keyboard formatting pc">
+        <a href="service.html?service=Laptop Repair" class="quick-box">
             <div class="icon" style="color: #00e676;">💻</div>
             <span>Laptop Repair</span>
         </a>
@@ -162,19 +162,19 @@
         </div>
 
         <div class="trending-grid" id="servicesGrid">
-            <div class="trending-card" data-search="ac repair gas foam jet servicing split window ac cooling filter installation">
+            <div class="trending-card">
                 <h4>Foam-jet AC Service</h4>
                 <p>Deep split/window AC servicing with high-pressure foam jet technology.</p>
                 <div class="price-line">💧 Service starts at just ₹199</div>
                 <a href="rates.html" class="rate-list-link">📄 VIEW FULL RATE LIST</a>
             </div>
-            <div class="trending-card" data-search="cleaning bathroom sofa deep clean home wash room kitchen chimney dust cleaning">
+            <div class="trending-card">
                 <h4>Bathroom Deep Cleaning</h4>
                 <p>Intense stain removal, tile scrubbing, and complete disinfection.</p>
                 <div class="price-line">💧 Service starts at just ₹299</div>
                 <a href="rates.html" class="rate-list-link">📄 VIEW FULL RATE LIST</a>
             </div>
-            <div class="trending-card" data-search="electrician wiring switch fan light bulb socket board repair plumber nal repair tap leak pipe water wash basin jet spray">
+            <div class="trending-card">
                 <h4>Switchboard & Plumbing Hacks</h4>
                 <p>Complete home safe wiring check, short-circuit troubleshooting, and urgent tap fix.</p>
                 <div class="price-line">💧 Service starts at just ₹49</div>
@@ -215,7 +215,7 @@
             <form id="workerForm">
                 <div class="form-group"><label>Full Name</label><input type="text" id="workerNameInput" required></div>
                 <div class="form-group"><label>Mobile Number</label><input type="tel" id="workerPhoneInput" required></div>
-                <div class="form-group"><label>Aadhaar Number</label><input type="text" id="workerAadhaarInput" placeholder="Enter 12-digit Aadhaar" required></div>
+                <div class="form-group"><label>[Aadhaar Redacted]</label><input type="text" id="workerAadhaarInput" placeholder="Enter 12-digit number" required></div>
                 <div class="form-group">
                     <label>Select Your Skill / Work</label>
                     <select id="workerSkill" required>
@@ -252,7 +252,7 @@
         function filterServices() {
             var query = document.getElementById('searchInput').value.toLowerCase();
             document.querySelectorAll('.trending-card, .quick-box').forEach(el => {
-                const text = (el.dataset.search || el.dataset.tags || el.innerText).toLowerCase();
+                const text = (el.innerText).toLowerCase();
                 el.style.display = text.includes(query) ? 'flex' : 'none';
             });
         }

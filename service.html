@@ -9,53 +9,41 @@
         body { background-color: #0b0f17; color: white; padding-bottom: 50px; }
         header { background-color: #0d1117; padding: 20px 8%; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1f2937; }
         .logo-text h1 { font-size: 24px; font-weight: 900; color: #00d2ff; }
-        .nav-actions { display: flex; gap: 10px; }
-        .logout-btn { background: #ef4444; color: white; padding: 8px 16px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; }
-        .bookings-btn { background: #6366f1; color: white; padding: 8px 16px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; }
         .booking-container { max-width: 600px; margin: 40px auto; padding: 30px; background: #111827; border: 1px solid #1f2937; border-radius: 16px; }
-        .booking-container h2 { font-size: 28px; text-align: center; margin-bottom: 10px; }
-        .booking-container p { color: #9ca3af; text-align: center; margin-bottom: 30px; }
         .form-group { margin-bottom: 22px; }
         .form-group label { display: block; font-size: 14px; color: #9ca3af; margin-bottom: 8px; font-weight: 600; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: #1f2937; border: 1px solid #374151; border-radius: 8px; color: white; font-size: 15px; outline: none; }
-        .book-btn { width: 100%; padding: 15px; border: none; border-radius: 8px; background: #00d2ff; color: #0b0f17; font-weight: 700; font-size: 17px; cursor: pointer; }
+        .service-list { display: grid; gap: 10px; background: #1f2937; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
+        .service-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #374151; }
+        .book-btn { width: 100%; padding: 15px; border: none; border-radius: 8px; background: #00d2ff; color: #0b0f17; font-weight: 700; cursor: pointer; }
+        .caution-box { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo-text"><h1 id="welcomeTitle">DOMVEX</h1></div>
-        <div class="nav-actions">
-            <button class="bookings-btn" onclick="window.location.href='customer_dashboard.html'">My Bookings</button>
-            <button class="logout-btn" onclick="logout()">Log Out</button>
-        </div>
     </header>
 
     <div class="booking-container">
-        <h2>Book Your Home Service</h2>
-        <p>Enter details and our expert will reach your doorstep instantly.</p>
+        <h2>Book Your Service</h2>
+        <div class="caution-box"><strong>Caution:</strong> ₹149 visiting charge applies if no work is done.</div>
         
         <form id="bookingForm">
             <div class="form-group">
                 <label>Registered Mobile Number</label>
-                <input type="tel" id="bookPhone" readonly required>
+                <input type="tel" id="bookPhone" style="background:#1f2937; color:white; padding:12px; width:100%; border:none; border-radius:8px;" readonly>
             </div>
+            
             <div class="form-group">
-                <label>Select Required Service</label>
-                <select id="bookService" required>
-                    <option value="">-- Choose a Service --</option>
-                    <option value="Electrician">⚡ Electrician (Wiring, Repair)</option>
-                    <option value="Plumber">🚰 Plumber (Leakage, Fitting)</option>
-                    <option value="AC Repair">❄️ AC Repair & Servicing</option>
-                    <option value="Cleaning">🧹 Deep House Cleaning</option>
-                    <option value="Beauty/Spa">💄 Beauty/Spa (Salon, Grooming)</option>
-                </select>
+                <label>Select Services</label>
+                <div id="serviceList" class="service-list"></div>
             </div>
+
             <div class="form-group">
                 <label>Full Service Address</label>
-                <textarea id="bookAddress" rows="3" required></textarea>
+                <textarea id="bookAddress" rows="3" style="width:100%; padding:12px; background:#1f2937; color:white; border-radius:8px; border:1px solid #374151;" required></textarea>
             </div>
-            <button type="submit" class="book-btn">Book Appointment Now</button>
+            <button type="submit" class="book-btn">Confirm Booking</button>
         </form>
     </div>
 
@@ -64,7 +52,6 @@
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCpoTdWajiA1rjX6AzIJ10hZ_EkW5YrmNE",
-            authDomain: "domvex-45097.firebaseapp.com",
             databaseURL: "https://domvex-45097-default-rtdb.firebaseio.com/",
             projectId: "domvex-45097",
             storageBucket: "domvex-45097.firebasestorage.app",
@@ -74,21 +61,41 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
 
-        window.onload = function() {
-            const name = localStorage.getItem('customerName');
-            const phone = localStorage.getItem('customerPhone');
-            if(!phone) {
-                alert('Pehle login karein!');
-                window.location.href = 'index.html';
-            } else {
-                document.getElementById('welcomeTitle').innerText = "DOMVEX - Hi, " + name;
-                document.getElementById('bookPhone').value = phone;
-                // GPS update call
-                requestLocation(phone);
-            }
-        }
+        const serviceMap = {
+            "Electrician": {"Switch / Socket Repair": 119, "Fan Installation": 179, "Ceiling Fan Repair": 149, "Tube Light Fitting": 119, "Door Bell Installation": 149, "Exhaust Fan Installation": 179, "Fault Finding Visit": 149, "MCB Replacement": 249, "Minor Wiring Work": 349, "Geyser Installation": 399, "Inverter Installation": 599},
+            "Plumber": {"Tap Repair": 119, "Leakage Repair": 179, "Flush Repair": 249, "Drain Cleaning": 249, "Wash Basin Fitting": 299, "Jet Spray Installation": 149, "Water Motor Checkup": 249, "Water Motor Installation": 599, "Water Tank Cleaning": 699},
+            "AC Repair": {"AC Inspection": 149, "AC General Service": 499, "Foam Jet Service": 549, "Deep Cleaning": 699, "AC Installation": 899, "AC Uninstallation": 499, "Water Leakage Fix": 349, "PCB Checkup": 299, "Gas Refill": 2499},
+            "Cleaning": {"Bathroom Cleaning": 349, "Kitchen Cleaning": 699, "Sofa Cleaning": 599, "Mattress Cleaning": 299, "Water Tank Cleaning": 699, "Chimney Cleaning": 499, "1 BHK Deep Cleaning": 2499, "2 BHK Deep Cleaning": 3499, "3 BHK Deep Cleaning": 4999},
+            "Painting": {"Wall Touch-up": 399, "Single Accent Wall": 999, "Room Painting": 2999, "1 BHK Painting": 11999, "2 BHK Painting": 16999, "3 BHK Painting": 22999, "Putty Work (sq ft)": 12, "Texture Paint (sq ft)": 25},
+            "Laptop Repair": {"OS Install": 399, "Software Cleanup": 299, "Internal Cleaning": 399, "Thermal Paste": 499, "SSD Installation": 299, "RAM Installation": 299, "Screen Labour": 399, "Keyboard Labour": 349, "Full Health Checkup": 299},
+            "Beauty/Spa": {"Hair Cut": 249, "Beard Styling": 149, "Hair Spa": 699, "Hair Smoothening": 2499, "Facial": 599, "Cleanup": 399, "Full Arms Waxing": 299, "Full Legs Waxing": 499, "Manicure": 399, "Pedicure": 499, "Threading": 49, "Party Makeup": 1999, "Bridal Makeup": 5999}
+        };
 
-        // GPS Location Function
+        window.onload = function() {
+            const phone = localStorage.getItem('customerPhone');
+            if(!phone) { window.location.href = 'index.html'; return; }
+            
+            document.getElementById('bookPhone').value = phone;
+            document.getElementById('welcomeTitle').innerText = "Hi, " + localStorage.getItem('customerName');
+            
+            // GPS Function Wapas Aa Gaya!
+            requestLocation(phone);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('service');
+            const listDiv = document.getElementById('serviceList');
+
+            if (serviceMap[category]) {
+                Object.entries(serviceMap[category]).forEach(([name, price]) => {
+                    listDiv.innerHTML += `
+                        <div class="service-item">
+                            <label><input type="checkbox" name="services" value="${name} (₹${price})"> ${name}</label>
+                            <span>₹${price}</span>
+                        </div>`;
+                });
+            }
+        };
+
         function requestLocation(phone) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
@@ -102,32 +109,24 @@
 
         document.getElementById('bookingForm').onsubmit = function(e) {
             e.preventDefault();
-            const phone = document.getElementById('bookPhone').value;
-            const service = document.getElementById('bookService').value;
-            const address = document.getElementById('bookAddress').value;
-            const name = localStorage.getItem('customerName');
-            const bookingId = "BK" + Math.floor(100000 + Math.random() * 900000);
+            let selected = [];
+            document.querySelectorAll('input[name="services"]:checked').forEach(cb => selected.push(cb.value));
+            
+            if(selected.length === 0) { alert("Select at least one service!"); return; }
 
+            const bookingId = "BK" + Date.now();
             database.ref('bookings/' + bookingId).set({
-                bookingId: bookingId,
-                customerName: name,
-                customerPhone: phone,
-                service: service,
-                address: address,
+                customerName: localStorage.getItem('customerName'),
+                customerPhone: document.getElementById('bookPhone').value,
+                services: selected.join(", "),
+                address: document.getElementById('bookAddress').value,
                 timestamp: new Date().toLocaleString(),
                 status: "Pending"
-            }, function(err) {
-                if(!err) {
-                    alert('🚀 Booking Confirmed! Your booking is now pending. We will notify you once accepted.');
-                    window.location.href = 'customer_dashboard.html';
-                }
+            }, () => {
+                alert('Booking Confirmed!');
+                window.location.href = 'customer_dashboard.html';
             });
         };
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
     </script>
 </body>
 </html>

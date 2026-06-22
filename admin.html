@@ -16,13 +16,24 @@
         .metric-card { background: #111827; padding: 25px; border-radius: 12px; border: 1px solid #1f2937; text-align: center; }
         table { width: 100%; border-collapse: collapse; background: #111827; border-radius: 12px; overflow: hidden; margin-bottom: 30px; }
         th { background: #1f2937; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #1f2937; }
+        td { padding: 15px; border-bottom: 1px solid #1f2937; cursor: pointer; }
         .btn-act { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         .del { background: #ef4444; color: white; }
-        .ver { background: #10b981; color: white; }
+        
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
+        .modal-content { background: #111827; margin: 10% auto; padding: 20px; border: 1px solid #1f2937; width: 300px; border-radius: 12px; }
     </style>
 </head>
 <body>
+
+    <div id="workerModal" class="modal">
+        <div class="modal-content">
+            <h2>Worker Profile</h2>
+            <div id="modalDetails" style="margin-top: 15px;"></div>
+            <button onclick="document.getElementById('workerModal').style.display='none'" style="margin-top: 15px; background: #374151; width: 100%; padding: 10px; cursor: pointer;">Close</button>
+        </div>
+    </div>
 
     <div class="login-box" id="loginUI">
         <h2>Admin Verification</h2>
@@ -56,7 +67,7 @@
         
         <h2>Registered Workers List</h2>
         <table>
-            <thead><tr><th>Name</th><th>Phone</th><th>Skill</th><th>Aadhaar</th><th>Rating</th><th>Status</th><th>Action</th></tr></thead>
+            <thead><tr><th>Name</th><th>Phone</th><th>Skill</th><th>Aadhaar</th><th>Rating</th><th>Action</th></tr></thead>
             <tbody id="workerTableBody"></tbody>
         </table>
     </div>
@@ -76,8 +87,18 @@
             } else { alert("Bhai, tu Admin nahi hai!"); }
         }
 
+        function showWorkerDetails(w) {
+            document.getElementById('modalDetails').innerHTML = `
+                <p><strong>Name:</strong> ${w.name}</p>
+                <p><strong>Phone:</strong> ${w.phone}</p>
+                <p><strong>Aadhaar:</strong> ${w.aadhaar || '[Aadhaar Redacted]'}</p>
+                <p><strong>Total Earnings:</strong> ₹${w.totalEarnings || 0}</p>
+                <p><strong>Total Jobs:</strong> ${w.jobsCount || 0}</p>
+            `;
+            document.getElementById('workerModal').style.display = 'block';
+        }
+
         function loadData() {
-            // Load Customers
             database.ref('customers').on('value', snap => {
                 const tbody = document.getElementById('customerTableBody');
                 tbody.innerHTML = '';
@@ -89,7 +110,6 @@
                 document.getElementById('countCustomers').innerText = count;
             });
 
-            // Load Workers
             database.ref('workers').on('value', snap => {
                 const tbody = document.getElementById('workerTableBody');
                 tbody.innerHTML = '';
@@ -97,8 +117,6 @@
                 snap.forEach(child => {
                     count++;
                     const w = child.val();
-                    
-                    // Rating Calculation
                     let total = 0, rateCount = 0;
                     if(w.ratings) {
                         for(let id in w.ratings) {
@@ -108,12 +126,14 @@
                     }
                     const avgRating = rateCount > 0 ? (total/rateCount).toFixed(1) : "0.0";
 
-                    tbody.innerHTML += `<tr><td>${w.name}</td><td>${w.phone}</td><td>${w.skill}</td><td>[Aadhaar Redacted]</td><td>⭐ ${avgRating}</td><td>${w.verified ? '✅ Verified' : '❌ Pending'}</td><td>${!w.verified ? `<button class="btn-act ver" onclick="verify('${child.key}')">Verify</button>` : ''} <button class="btn-act del" onclick="remove('workers/${child.key}')">Delete</button></td></tr>`;
+                    const tr = document.createElement('tr');
+                    tr.onclick = () => showWorkerDetails(w);
+                    tr.innerHTML = `<td>${w.name}</td><td>${w.phone}</td><td>${w.skill}</td><td>${w.aadhaar || '[Aadhaar Redacted]'}</td><td>⭐ ${avgRating}</td><td><button class="btn-act del" onclick="event.stopPropagation(); remove('workers/${child.key}')">Delete</button></td></tr>`;
+                    tbody.appendChild(tr);
                 });
                 document.getElementById('countWorkers').innerText = count;
             });
             
-            // Load Bookings
             database.ref('bookings').on('value', snap => {
                 const tbody = document.getElementById('adminTableBody');
                 tbody.innerHTML = '';
@@ -127,7 +147,6 @@
             });
         }
 
-        function verify(key) { database.ref('workers/' + key).update({ verified: true }); }
         function remove(path) { if(confirm("Sure, delete karna hai?")) database.ref(path).remove(); }
     </script>
 </body>
