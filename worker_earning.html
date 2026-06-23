@@ -7,8 +7,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background-color: #0b0f17; color: white; padding-bottom: 50px; }
-        header { background-color: #0d1117; padding: 20px 8%; border-bottom: 1px solid #1f2937; }
+        header { background-color: #0d1117; padding: 20px 8%; border-bottom: 1px solid #1f2937; display: flex; justify-content: space-between; align-items: center; }
         .logo-text h1 { font-size: 24px; color: #00d2ff; }
+        .back-btn { background: #374151; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: bold; }
         
         .container { max-width: 800px; margin: 40px auto; padding: 20px; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
@@ -25,6 +26,7 @@
 
     <header>
         <div class="logo-text"><h1>DOMVEX <span style="font-size: 14px; color: #6366f1;">Worker Portal</span></h1></div>
+        <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
     </header>
 
     <div class="container">
@@ -56,7 +58,6 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Worker ka phone number localStorage se uthao (jo login ke waqt save kiya tha)
         const workerPhone = localStorage.getItem('workerPhone');
 
         window.onload = function() {
@@ -69,7 +70,6 @@
         };
 
         function fetchEarnings() {
-            // Firebase se data lekar card update karo
             database.ref('workers/' + workerPhone + '/stats').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if(data) {

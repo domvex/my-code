@@ -12,7 +12,7 @@
         header { padding: 25px 6%; display: flex; align-items: center; justify-content: space-between; background: transparent; position: absolute; width: 100%; top: 0; left: 0; z-index: 100; }
         .logo-img { height: 60px; width: auto; display: block; object-fit: contain; }
         .nav-buttons { display: flex; gap: 15px; }
-        .nav-link-btn { background: transparent; color: #1e293b; border: none; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 16px; transition: 0.2s; }
+        .nav-link-btn { background: transparent; color: #1e293b; border: none; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 16px; transition: 0.2s; text-decoration: none; }
         .nav-link-btn.accent { background: #6d28d9; color: white; border-radius: 6px; padding: 8px 18px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(109, 40, 217, 0.2); }
         .nav-link-btn:hover { opacity: 0.8; }
 
@@ -44,6 +44,12 @@
         .section-title-row h3 { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; color: #0f172a; }
         .section-title-row .see-all { color: #64748b; font-size: 13px; text-decoration: none; font-weight: 600; }
 
+        /* NEW: WHY CHOOSE US SECTION */
+        .why-choose-us { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin: 40px 0; }
+        .feature-card { background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); text-align: center; }
+        .feature-card h4 { color: #0f172a; margin-bottom: 10px; }
+        .feature-card p { color: #64748b; font-size: 13px; line-height: 1.5; }
+
         /* OFFERS BANNER CARD (LIGHT THEME MODIFIED) */
         .promo-banner-card { background: linear-gradient(90deg, #4c1d95, #1e3a8a); border-radius: 14px; padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 45px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .promo-info h4 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: white; }
@@ -60,11 +66,9 @@
         .trending-card p { color: #475569; font-size: 13px; line-height: 1.5; }
         .price-line { font-size: 13px; color: #0369a1; font-weight: 600; margin-top: 5px; }
         
-        /* RATES.HTML REDIRECTION LINK */
         .rate-list-link { color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-top: 5px; text-decoration: none; display: inline-block; width: fit-content; transition: 0.2s; }
         .rate-list-link:hover { color: #0284c7; text-decoration: underline; }
 
-        /* MODALS POPUP LAYOUT (LIGHT THEME MODIFIED) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 99999; display: none; justify-content: center; align-items: center; }
         .modal-box { background: #ffffff; border: 1px solid #e2e8f0; padding: 45px 35px; border-radius: 16px; width: 90%; max-width: 400px; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); color: #1e293b; }
         .modal-box h3 { font-size: 22px; margin-bottom: 25px; text-align: center; font-weight: 700; color: #0f172a; }
@@ -78,7 +82,6 @@
         .work-submit { background: #6d28d9; color: white; box-shadow: 0 4px 12px rgba(109, 40, 217, 0.2); }
         .toggle-form-text { display: block; text-align: center; margin-top: 15px; font-size: 12px; color: #64748b; cursor: pointer; }
 
-        /* RESPONSIVE CSS */
         @media (max-width: 768px) {
             .hero-banner { height: 400px; }
             .hero-banner h2 { font-size: 28px; }
@@ -92,9 +95,9 @@
 <body>
 
     <header>
-        <div class="logo">
+        <a href="index.html" class="logo">
             <img src="logo.jpg" alt="Domvex Logo" class="logo-img">
-        </div>
+        </a>
         <div class="nav-buttons" id="navAuthButtons">
             <button class="nav-link-btn" onclick="openModal('customerModal')">Login</button>
             <button class="nav-link-btn accent" onclick="openModal('workerModal')">Join as Worker</button>
@@ -144,6 +147,29 @@
     </div>
 
     <div class="sections-wrapper">
+        <!-- WHY CHOOSE US SECTION -->
+        <div class="section-title-row">
+            <h3>Why Choose Domvex?</h3>
+        </div>
+        <div class="why-choose-us">
+            <div class="feature-card">
+                <h4>🛡️ 10-Day Warranty</h4>
+                <p>If the same issue reoccurs within 10 days, we fix it for free. No questions asked.</p>
+            </div>
+            <div class="feature-card">
+                <h4>✅ Verified Experts</h4>
+                <p>Every professional is background checked, trained, and highly skilled.</p>
+            </div>
+            <div class="feature-card">
+                <h4>⚡ Same-Day Service</h4>
+                <p>Book a slot and get an expert at your doorstep within just 2 hours.</p>
+            </div>
+            <div class="feature-card">
+                <h4>💰 Transparent Rates</h4>
+                <p>Flat, honest pricing with no hidden costs. Pay only after the work is done.</p>
+            </div>
+        </div>
+
         <div class="section-title-row">
             <h3>Offers & Discounts</h3>
         </div>
@@ -183,6 +209,18 @@
         </div>
     </div>
 
+    <footer style="background: #ffffff; color: #475569; padding: 40px 20px; text-align: center; margin-top: 80px; border-top: 1px solid #e2e8f0;">
+        <h3 style="color: #0f172a; margin-bottom: 10px;">Need Help? Contact Us</h3>
+        <p>For any complaints or support, reach out to our team:</p>
+        <div style="margin: 20px 0; line-height: 2;">
+            <p>📞 <strong>Helpline 1:</strong> +91 82790 82569</p>
+            <p>📞 <strong>Helpline 2:</strong> +91 92562 90755</p>
+            <p>📧 <strong>Email:</strong> domvexindia@gmail.com</p>
+        </div>
+        <p style="font-size: 12px; margin-top: 20px;">&copy; 2026 Domvex India. All rights reserved.</p>
+    </footer>
+
+    <!-- Modals (As it is) -->
     <div id="customerModal" class="modal-overlay">
         <div class="modal-box">
             <span class="close-btn" onclick="closeModal('customerModal')">&times;</span>
@@ -215,7 +253,7 @@
             <form id="workerForm">
                 <div class="form-group"><label>Full Name</label><input type="text" id="workerNameInput" required></div>
                 <div class="form-group"><label>Mobile Number</label><input type="tel" id="workerPhoneInput" required></div>
-                <div class="form-group"><label>[Aadhaar Redacted]</label><input type="text" id="workerAadhaarInput" placeholder="Enter 12-digit number" required></div>
+                <div class="form-group"><label>Identity Document</label><input type="text" id="workerAadhaarInput" placeholder="Enter 12-digit number" required></div>
                 <div class="form-group">
                     <label>Select Your Skill / Work</label>
                     <select id="workerSkill" required>
@@ -228,7 +266,7 @@
                     </select>
                 </div>
                 <div class="form-group"><label>Create Password</label><input type="password" id="workerPassInput" required></div>
-                <button type="submit" class="submit-btn work-submit">Register Now</button>
+                <button type="submit" class="submit-btn work-submit">Continue to Terms</button>
             </form>
         </div>
     </div>
@@ -242,11 +280,29 @@
 
         window.onload = function() {
             const custName = localStorage.getItem('customerName');
+            const workerPhone = localStorage.getItem('workerPhone');
             const navButtons = document.getElementById('navAuthButtons');
+
             if (custName) {
-                navButtons.innerHTML = `<span style="color:#1e293b; font-weight:700; margin-right:10px;">Hi, ${custName.split(' ')[0]}</span>
+                navButtons.innerHTML = `<a href="customer_dashboard.html" class="nav-link-btn">Dashboard</a>
+                                        <button class="nav-link-btn" onclick="logout()">Logout</button>`;
+            } else if (workerPhone) {
+                navButtons.innerHTML = `<a href="dashboard.html" class="nav-link-btn">Worker Dashboard</a>
                                         <button class="nav-link-btn" onclick="logout()">Logout</button>`;
             }
+        };
+
+        document.getElementById('workerForm').onsubmit = function(e) {
+            e.preventDefault();
+            const workerData = {
+                name: document.getElementById('workerNameInput').value,
+                phone: document.getElementById('workerPhoneInput', "[Aadhaar Redacted]").value,
+                aadhaar: "[Aadhaar Redacted]",
+                skill: document.getElementById('workerSkill').value,
+                password: document.getElementById('workerPassInput').value
+            };
+            localStorage.setItem('tempWorkerData', JSON.stringify(workerData));
+            window.location.href = 'terms.html';
         };
 
         function filterServices() {
@@ -281,7 +337,7 @@
             });
         };
 
-        function logout() { localStorage.clear(); location.reload(); }
+       function logout() { localStorage.clear(); location.reload(); }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function toggleCustForm(isSignup) {
