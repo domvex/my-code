@@ -100,51 +100,113 @@
         .work-submit { background: #6d28d9; color: white; box-shadow: 0 4px 12px rgba(109, 40, 217, 0.2); }
         .toggle-form-text { display: block; text-align: center; margin-top: 15px; font-size: 12px; color: #64748b; cursor: pointer; }
 
-    @media (max-width: 768px) {
-    /* Grid layout ko 3 columns mein set kar diya */
-    .services-quick-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr); /* 3 items per line */
-        gap: 10px;
-        padding: 10px;
-        margin-top: 10px;
+   
+
+/* --- PREMIUM MOBILE RESPONSIVE CODE --- */
+@media screen and (max-width: 600px) {
+    /* Glassmorphism Header */
+    header {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 12px 15px;
     }
 
-    /* Icons aur box ka size adjust kiya */
-    .quick-box {
-        padding: 8px;
-        font-size: 12px; /* Font thoda chhota taaki fit ho jaye */
+    /* Soft Hero Banner */
+    .hero-banner {
+        background: linear-gradient(135deg, #6d28d9, #4f46e5); /* Gradient look */
+        color: white;
+        border-radius: 0 0 30px 30px; /* Neeche se rounded */
+        padding: 40px 20px;
     }
 
-    .quick-box img {
-        height: 65px; /* Height kam kar di taaki layout na phate */
+    /* Premium Search Bar */
+    .search-container {
+        background: white;
+        padding: 5px;
+        border-radius: 50px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        border: none;
+    }
+    .search-container input {
+        border: none;
+        outline: none;
+        padding: 10px 20px;
         width: 100%;
-        object-fit: cover;
-        border-radius: 8px;
-        margin-bottom: 5px;
+        border-radius: 50px;
     }
 
-    /* Hero banner ki spacing fix ki */
-    .hero-banner { 
-        height: auto; 
-        padding: 30px 15px; 
+    /* Modern Quick Grid */
+    .services-quick-grid {
+        grid-template-columns: repeat(3, 1fr) !important; /* Wapas 3 kiya, par style change hai */
+        gap: 12px;
+        padding: 20px 10px;
+    }
+
+    .quick-box {
+        background: white;
+        padding: 15px 5px;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .quick-box:active {
+        transform: scale(0.92); /* Button click effect */
     }
 }
 
-/* Mobile Responsive Fixes */
-@media screen and (max-width: 600px) {
-    header { padding: 10px 5%; flex-direction: column; gap: 10px; }
-    .hero-banner { height: auto; min-height: 400px; padding: 20px; }
-    .search-container { width: 95%; margin: 20px auto; }
+@media (max-width: 768px) {
+    /* Grid layout */
     .services-quick-grid {
+        display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        padding: 10px;
+        gap: 12px; /* Thoda gap badha diya premium feel ke liye */
+        padding: 15px;
+        margin-top: 10px;
     }
-    .quick-box img { height: 50px; }
-    .quick-box span { font-size: 11px; }
-    .trending-grid { grid-template-columns: 1fr; }
-    .promo-banner-card { padding: 20px; text-align: center; }
+
+    /* Premium Quick Box */
+    .quick-box {
+        padding: 10px;
+        background: #ffffff;
+        border-radius: 16px; /* Corners aur rounded kar diye */
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smooth bounce effect */
+        cursor: pointer;
+    }
+
+    /* Hover effect for premium feel */
+    .quick-box:hover {
+        transform: translateY(-8px) scale(1.05); /* Upar uthega aur thoda bada hoga */
+        box-shadow: 0 10px 20px rgba(109, 40, 217, 0.15); /* Purple shadow glow */
+        border-color: rgba(109, 40, 217, 0.2);
+    }
+
+    .quick-box img {
+        height: 65px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 12px; /* Image ke corners bhi rounded */
+        margin-bottom: 8px;
+        transition: filter 0.3s ease;
+    }
+
+    /* Hover pe image thodi bright hogi */
+    .quick-box:hover img {
+        filter: brightness(1.1);
+    }
+
+    /* Hero banner spacing */
+    .hero-banner { 
+        height: auto; 
+        padding: 40px 20px;
+        background-size: cover;
+    }
 }
 
     </style>
@@ -442,6 +504,21 @@ function handleCategoryClick(category) {
             document.getElementById('customerLoginArea').style.display = isSignup ? 'none' : 'block';
             document.getElementById('customerSignupArea').style.display = isSignup ? 'block' : 'none';
         }
+
+        // Worker Status Check Function
+async function verifyUserStatus(uid) {
+    const snapshot = await firebase.database().ref('workers/' + uid).once('value');
+    const data = snapshot.val();
+
+    if (data && data.isBanned === true) {
+        alert("Aapka account block kar diya gaya hai. Karan: Violation of terms.");
+        firebase.auth().signOut();
+        window.location.href = "login.html"; // Login page pe bhej do
+        return false;
+    }
+    return true;
+}
+
     </script>
 </body>
 </html>

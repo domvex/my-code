@@ -98,6 +98,28 @@
             document.getElementById('workerModal').style.display = 'block';
         }
 
+        // --- NAYA WARNING & BAN SYSTEM ---
+        function warnWorker(workerKey, name) {
+            const ref = database.ref('workers/' + workerKey);
+            ref.once('value').then(snap => {
+                let w = snap.val();
+                let count = (w.warningCount || 0) + 1;
+                if (count >= 3) {
+                    banWorker(workerKey, name);
+                } else {
+                    ref.update({ warningCount: count });
+                    alert(name + " ko warning di gayi. Total Warnings: " + count);
+                }
+            });
+        }
+
+        function banWorker(workerKey, name) {
+            if(confirm("Kya aap " + name + " ko permanently ban karna chahte hain?")) {
+                database.ref('workers/' + workerKey).update({ isBanned: true, banReason: "Violation of terms" })
+                .then(() => alert(name + " ab banned hai."));
+            }
+        }
+
         function loadData() {
             database.ref('customers').on('value', snap => {
                 const tbody = document.getElementById('customerTableBody');
@@ -128,7 +150,10 @@
 
                     const tr = document.createElement('tr');
                     tr.onclick = () => showWorkerDetails(w);
-                    tr.innerHTML = `<td>${w.name}</td><td>${w.phone}</td><td>${w.skill}</td><td>${w.aadhaar || '[Aadhaar Redacted]'}</td><td>⭐ ${avgRating}</td><td><button class="btn-act del" onclick="event.stopPropagation(); remove('workers/${child.key}')">Delete</button></td></tr>`;
+                    tr.innerHTML = `<td>${w.name}</td><td>${w.phone}</td><td>${w.skill}</td><td>${w.aadhaar || '[Aadhaar Redacted]'}</td><td>⭐ ${avgRating}</td><td>
+                        <button class="btn-act" style="background:#f59e0b; color:white; margin-right:5px;" onclick="event.stopPropagation(); warnWorker('${child.key}', '${w.name}')">Warn</button>
+                        <button class="btn-act del" onclick="event.stopPropagation(); banWorker('${child.key}', '${w.name}')">Ban</button>
+                        <button class="btn-act del" onclick="event.stopPropagation(); remove('workers/${child.key}')">Delete</button></td></tr>`;
                     tbody.appendChild(tr);
                 });
                 document.getElementById('countWorkers').innerText = count;
@@ -148,6 +173,7 @@
         }
 
         function remove(path) { if(confirm("Sure, delete karna hai?")) database.ref(path).remove(); }
-    </script>
+ 
+   </script>
 </body>
 </html>
