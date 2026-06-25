@@ -6,22 +6,31 @@
     <title>Domvex Worker Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #0b0f17; color: white; padding: 30px; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        body { background-color: #0b0f17; color: white; padding: 20px; }
+        
+        /* Header Fix for Mobile */
+        header { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; text-align: center; }
         h1 { color: #00d2ff; font-weight: 800; }
-        .header-actions { display: flex; gap: 10px; }
+        .header-actions { display: flex; gap: 10px; justify-content: center; }
         .earnings-link { background: #6366f1; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; }
         .logout-btn { background: #ef4444; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .panel { background: #111827; border: 1px solid #1f2937; padding: 25px; border-radius: 16px; }
-        .card { background: #1f2937; border: 1px solid #374151; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        
+        /* Responsive Grid */
+        .grid-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 768px) { .grid-container { grid-template-columns: 1fr 1fr; } }
+        
+        .panel { background: #111827; border: 1px solid #1f2937; padding: 20px; border-radius: 16px; }
+        .card { background: #1f2937; border: 1px solid #374151; padding: 18px; border-radius: 12px; margin-bottom: 15px; transition: transform 0.2s; }
+        .card:hover { transform: scale(1.02); }
+        
         .status-pending { color: #fbbf24; font-weight: bold; }
         .status-accepted { color: #10b981; font-weight: bold; }
         .status-completed { color: #6366f1; font-weight: bold; }
-        .action-btn { background: #00d2ff; color: #0b0f17; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; margin-right: 5px; text-decoration: none; display: inline-block; }
+        
+        .action-btn { background: #00d2ff; color: #0b0f17; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; display: block; width: 100%; text-align: center; text-decoration: none; }
         .complete-btn { background: #10b981; color: white; }
         .call-btn { background: #f59e0b; color: white; }
-        .rating-box { background: #1f2937; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #f59e0b; text-align: center; }
+        .rating-box { background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #f59e0b; text-align: center; }
     </style>
 </head>
 <body>
@@ -29,7 +38,7 @@
     <header>
         <h1>WORKER DASHBOARD</h1>
         <div class="header-actions">
-            <a href="worker_earning.html" class="earnings-link">View My Earnings</a>
+            <a href="worker_earning.html" class="earnings-link">Earnings</a>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </header>
@@ -40,11 +49,11 @@
                 <h2 style="color: #f59e0b;">⭐ My Average Rating</h2>
                 <h1 id="myRating">0.0</h1>
             </div>
-            <h2 style="color: #00d2ff;">🛒 My Bookings</h2>
+            <h2 style="color: #00d2ff; margin-bottom: 15px;">🛒 My Bookings</h2>
             <div id="liveBookings">Loading your services...</div>
         </div>
         <div class="panel">
-            <h2 style="color: #9b51e0;">👷 Active Expert Network</h2>
+            <h2 style="color: #9b51e0; margin-bottom: 15px;">👷 Active Expert Network</h2>
             <div id="liveWorkers">Loading...</div>
         </div>
     </div>
@@ -73,7 +82,6 @@
                 window.location.href = 'index.html';
                 return;
             }
-
             database.ref('workers/' + phone).once('value', (snap) => {
                 if(snap.exists()) {
                     mySkill = snap.val().skill;
@@ -86,10 +94,7 @@
         function loadRating() {
             database.ref('workers/' + phone + '/ratings').on('value', (snap) => {
                 let total = 0, count = 0;
-                snap.forEach(r => { 
-                    total += parseInt(r.val().rating); 
-                    count++; 
-                });
+                snap.forEach(r => { total += parseInt(r.val().rating); count++; });
                 document.getElementById('myRating').innerText = count > 0 ? (total/count).toFixed(1) : "0.0";
             });
         }
@@ -99,12 +104,10 @@
                 const container = document.getElementById('liveBookings');
                 container.innerHTML = '';
                 let found = false;
-
                 snap.forEach((child) => {
                     const data = child.val();
                     const isMyAccepted = (data.status === 'Accepted' && data.acceptedBy === phone);
                     const isAvailable = (data.status === 'Pending' && data.service === mySkill);
-
                     if(isMyAccepted || isAvailable) {
                         found = true;
                         container.innerHTML += `
@@ -113,43 +116,33 @@
                                 <p><strong>Customer:</strong> ${data.customerName}</p>
                                 <p><strong>Service:</strong> ${data.service}</p>
                                 <p><strong>Address:</strong> ${data.address}</p>
-                                ${isMyAccepted ? `<p><strong>Customer No:</strong> ${data.customerPhone}</p> <a href="tel:${data.customerPhone}" class="action-btn call-btn">Call Customer</a>` : ''}
-                                ${data.status === 'Pending' ? `<button class="action-btn" onclick="updateStatus('${data.bookingId}', 'Accepted')">Accept</button>` : ''}
-                                ${isMyAccepted ? `<button class="action-btn complete-btn" onclick="updateStatus('${data.bookingId}', 'Completed')">Complete</button>` : ''}
+                                ${isMyAccepted ? `<p><strong>No:</strong> ${data.customerPhone}</p> <a href="tel:${data.customerPhone}" class="action-btn call-btn">Call Customer</a>` : ''}
+                                ${data.status === 'Pending' ? `<button class="action-btn" onclick="updateStatus('${data.bookingId}', 'Accepted')">Accept Booking</button>` : ''}
+                                ${isMyAccepted ? `<button class="action-btn complete-btn" onclick="updateStatus('${data.bookingId}', 'Completed')">Complete Job</button>` : ''}
                             </div>`;
                     }
                 });
-                if(!found) container.innerHTML = '<p>No bookings available for you.</p>';
+                if(!found) container.innerHTML = '<p>No bookings available.</p>';
             });
         }
 
-      function updateStatus(id, newStatus) {
+        function updateStatus(id, newStatus) {
             const updates = { status: newStatus };
-            
-            if(newStatus === 'Accepted') {
-                updates.acceptedBy = phone; 
-            }
-            
-            // YEH LINE UPDATE KARO: Jab status 'Completed' ho, tab acceptedBy save karo
-            if(newStatus === 'Completed') {
-                updates.acceptedBy = phone; // Ye worker ka phone number database mein save kar dega
-            }
-
+            if(newStatus === 'Accepted') updates.acceptedBy = phone;
+            if(newStatus === 'Completed') updates.acceptedBy = phone;
             database.ref('bookings/' + id).update(updates).then(() => {
-                alert("Booking status updated!");  
+                alert("Status updated!");
+            });
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
         database.ref('workers').on('value', (snap) => {
             const container = document.getElementById('liveWorkers');
             container.innerHTML = '';
             snap.forEach((child) => {
                 const data = child.val();
-                container.innerHTML += `<div class="card"><p><strong>${data.name}</strong> - ${data.skill}</p></div>`;
+                container.innerHTML += `<div class="card"><p><strong>${data.name}</strong> (${data.skill})</p></div>`;
             });
         });
     </script>
