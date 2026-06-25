@@ -102,8 +102,9 @@
 
    
 
-/* --- PREMIUM MOBILE RESPONSIVE CODE --- */
-@media screen and (max-width: 600px) {
+
+/* --- PREMIUM RESPONSIVE CSS (Unified) --- */
+@media screen and (max-width: 768px) {
     /* Glassmorphism Header */
     header {
         background: rgba(255, 255, 255, 0.9);
@@ -117,10 +118,11 @@
 
     /* Soft Hero Banner */
     .hero-banner {
-        background: linear-gradient(135deg, #6d28d9, #4f46e5); /* Gradient look */
+        background: linear-gradient(135deg, #6d28d9, #4f46e5);
         color: white;
-        border-radius: 0 0 30px 30px; /* Neeche se rounded */
+        border-radius: 0 0 30px 30px;
         padding: 40px 20px;
+        height: auto;
     }
 
     /* Premium Search Bar */
@@ -130,6 +132,7 @@
         border-radius: 50px;
         box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         border: none;
+        margin-top: 20px;
     }
     .search-container input {
         border: none;
@@ -137,78 +140,37 @@
         padding: 10px 20px;
         width: 100%;
         border-radius: 50px;
+        color: #1e293b;
     }
 
-    /* Modern Quick Grid */
+    /* Modern Quick Grid - Premium Layout */
     .services-quick-grid {
-        grid-template-columns: repeat(3, 1fr) !important; /* Wapas 3 kiya, par style change hai */
+        grid-template-columns: repeat(3, 1fr);
         gap: 12px;
         padding: 20px 10px;
     }
 
     .quick-box {
         background: white;
-        padding: 15px 5px;
-        border-radius: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-
-    .quick-box:active {
-        transform: scale(0.92); /* Button click effect */
-    }
-}
-
-@media (max-width: 768px) {
-    /* Grid layout */
-    .services-quick-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px; /* Thoda gap badha diya premium feel ke liye */
-        padding: 15px;
-        margin-top: 10px;
-    }
-
-    /* Premium Quick Box */
-    .quick-box {
         padding: 10px;
-        background: #ffffff;
-        border-radius: 16px; /* Corners aur rounded kar diye */
-        border: 1px solid rgba(0, 0, 0, 0.03);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smooth bounce effect */
-        cursor: pointer;
-    }
-
-    /* Hover effect for premium feel */
-    .quick-box:hover {
-        transform: translateY(-8px) scale(1.05); /* Upar uthega aur thoda bada hoga */
-        box-shadow: 0 10px 20px rgba(109, 40, 217, 0.15); /* Purple shadow glow */
-        border-color: rgba(109, 40, 217, 0.2);
+        border-radius: 16px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .quick-box img {
         height: 65px;
         width: 100%;
         object-fit: cover;
-        border-radius: 12px; /* Image ke corners bhi rounded */
+        border-radius: 12px;
         margin-bottom: 8px;
-        transition: filter 0.3s ease;
     }
 
-    /* Hover pe image thodi bright hogi */
-    .quick-box:hover img {
-        filter: brightness(1.1);
-    }
-
-    /* Hero banner spacing */
-    .hero-banner { 
-        height: auto; 
-        padding: 40px 20px;
-        background-size: cover;
+    /* Click effect */
+    .quick-box:active {
+        transform: scale(0.95);
     }
 }
-
     </style>
 </head>
 <body>
