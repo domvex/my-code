@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Confirm Booking | Domvex</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f8fafc; padding: 20px; }
+        
+        .booking-card { 
+            background: white; padding: 24px; border-radius: 16px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 400px; margin: 0 auto; 
+        }
+        
+        .header { margin-bottom: 24px; }
+        .header h2 { font-size: 20px; color: #0f172a; margin-bottom: 8px; }
+        .header p { color: #64748b; font-size: 14px; }
+        
+        .summary-box { 
+            background: #f1f5f9; padding: 16px; border-radius: 12px; margin-bottom: 20px; 
+        }
+        .summary-box p { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
+        .summary-box span { font-weight: 700; color: #0f172a; }
+        
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+        .input-group input { 
+            width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; 
+            font-size: 14px; outline: none; transition: border 0.3s;
+        }
+        .input-group input:focus { border-color: #6366f1; }
+        
+        .btn-confirm { 
+            width: 100%; background: #6366f1; color: white; padding: 14px; 
+            border: none; border-radius: 8px; font-weight: 700; font-size: 15px; 
+            cursor: pointer; transition: background 0.3s;
+        }
+        .btn-confirm:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+
+<div class="booking-card">
+    <div class="header">
+        <h2>Confirm Booking</h2>
+        <p>Review your service details before booking.</p>
+    </div>
+
+    <div class="summary-box" id="cartList">
+        <p>Service Details:</p>
+        <div id="displayArea"></div>
+        <hr style="margin: 10px 0;">
+        <p>Total: <span id="totalPrice">₹0</span></p>
+    </div>
+
+    <form id="bookingForm">
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="custName" placeholder="Enter your name" required>
+        </div>
+        <div class="input-group">
+            <label>Service Address</label>
+            <input type="text" id="custAddress" placeholder="Enter full address" required>
+        </div>
+        <div class="input-group">
+            <label>Phone Number</label>
+            <input type="tel" id="custPhone" placeholder="Enter phone number" required>
+        </div>
+        <button type="submit" class="btn-confirm">Book Now</button>
+    </form>
+</div>
+
+<script>
+    // 1. Cart se saari items uthana
+    const cart = JSON.parse(localStorage.getItem('cartItems') || "[]");
+    const displayArea = document.getElementById('displayArea');
+    const totalSpan = document.getElementById('totalPrice');
+
+    let total = 0;
+    let serviceNames = [];
+
+    cart.forEach(item => {
+        serviceNames.push(item.name);
+        // Price mein se sirf numbers nikalna
+        let priceVal = parseInt(item.price.replace(/[^0-9]/g, ''));
+        total += priceVal;
+
+        displayArea.innerHTML += `<p>${item.name} <span>${item.price}</span></p>`;
+    });
+
+    totalSpan.innerText = "₹" + total;
+
+    // 2. User details auto-fill
+    document.getElementById('custName').value = localStorage.getItem('customerName') || "";
+    document.getElementById('custPhone').value = localStorage.getItem('customerPhone') || "";
+
+    // 3. Submit Logic
+    document.getElementById('bookingForm').onsubmit = function(e) {
+        e.preventDefault();
+
+        const newBooking = {
+            service: serviceNames.join(", "), // Saari services comma se alag
+            price: "₹" + total,
+            name: document.getElementById('custName').value,
+            address: document.getElementById('custAddress').value,
+            phone: document.getElementById('custPhone').value,
+            date: new Date().toLocaleDateString(),
+            status: "PENDING" // Dashboard ke liye zaroori
+        };
+
+        let bookings = JSON.parse(localStorage.getItem('myBookings') || "[]");
+        bookings.push(newBooking);
+        localStorage.setItem('myBookings', JSON.stringify(bookings));
+        
+        // Cart clear kar dena
+        localStorage.removeItem('cartItems');
+
+        alert('Booking Confirmed!');
+        window.location.href = 'customer_dashboard.html';
+    };
+</script>
+</body>
+</html>

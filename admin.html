@@ -55,7 +55,7 @@
 
         <h2>Active Bookings</h2>
         <table>
-            <thead><tr><th>Booking ID</th><th>Customer</th><th>Service</th><th>Status</th><th>Action</th></tr></thead>
+            <thead><tr><th>Booking ID</th><th>Customer</th><th>Service</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
         </table>
 
@@ -98,7 +98,6 @@
             document.getElementById('workerModal').style.display = 'block';
         }
 
-        // --- NAYA WARNING & BAN SYSTEM ---
         function warnWorker(workerKey, name) {
             const ref = database.ref('workers/' + workerKey);
             ref.once('value').then(snap => {
@@ -166,14 +165,14 @@
                 snap.forEach(child => {
                     count++;
                     const b = child.val();
-                    tbody.innerHTML += `<tr><td>${b.bookingId}</td><td>${b.customerName}</td><td>${b.service}</td><td>${b.status}</td><td><button class="btn-act del" onclick="remove('bookings/${child.key}')">Delete</button></td></tr>`;
+                    // Date display add kar di hai niche
+                    tbody.innerHTML += `<tr><td>${b.bookingId || 'N/A'}</td><td>${b.customerName}</td><td>${b.service}</td><td>${b.date || 'N/A'}</td><td>${b.status}</td><td><button class="btn-act del" onclick="remove('bookings/${child.key}')">Delete</button></td></tr>`;
                 });
                 document.getElementById('countBookings').innerText = count;
             });
         }
 
         function remove(path) { if(confirm("Sure, delete karna hai?")) database.ref(path).remove(); }
- 
    </script>
 </body>
 </html>

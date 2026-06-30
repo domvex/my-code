@@ -2,120 +2,143 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book a Service - Domvex</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Domvex | Service Selection</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #0b0f17; color: white; padding-bottom: 50px; }
-        header { background-color: #0d1117; padding: 20px 8%; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1f2937; }
-        .logo-text h1 { font-size: 24px; font-weight: 900; color: #00d2ff; }
-        .booking-container { max-width: 600px; margin: 40px auto; padding: 30px; background: #111827; border: 1px solid #1f2937; border-radius: 16px; }
-        .form-group { margin-bottom: 22px; }
-        .form-group label { display: block; font-size: 14px; color: #9ca3af; margin-bottom: 8px; font-weight: 600; }
-        .service-list { display: grid; gap: 10px; background: #1f2937; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto; }
-        .service-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #374151; }
-        .book-btn { width: 100%; padding: 15px; border: none; border-radius: 8px; background: #00d2ff; color: #0b0f17; font-weight: 700; cursor: pointer; }
-        .caution-box { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #ffffff; color: #1e2937; padding-bottom: 100px; }
+        
+        /* Header */
+        .header-bar { background: white; padding: 12px 16px; display: flex; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #f1f5f9; }
+        .back-btn { text-decoration: none; color: #1e2937; font-weight: bold; }
+
+        /* Banner */
+        .service-banner { height: 80px; background: #f8fafc; color: #0f172a; display: flex; align-items: center; padding: 0 16px; font-size: 16px; }
+        
+        /* Urban Style Service Card */
+        .service-card { 
+            background: white; padding: 16px; 
+            display: flex; justify-content: space-between; align-items: flex-start; 
+            border-bottom: 1px solid #f1f5f9; 
+        }
+        .service-info { flex: 1; padding-right: 15px; }
+        .service-info h3 { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 4px; line-height: 1.4; }
+        .price-tag { font-size: 14px; font-weight: 600; color: #0f172a; margin-top: 4px; display: block; }
+        
+        .img-container { position: relative; width: 100px; }
+        .service-img { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; }
+        
+        .add-btn { 
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: #ffffff; color: #6d28d9; border: 1px solid #e2e8f0; 
+            padding: 6px 0; border-radius: 6px; font-weight: 700; font-size: 13px; 
+            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .add-btn.added { background: #6d28d9; color: white; border: none; }
+        .add-btn:active { transform: scale(0.95); }
+        
+        /* Cart Button */
+        #cartBtn { 
+            position: fixed; bottom: 20px; left: 20px; right: 20px; 
+            background: #6d28d9; color: white; padding: 15px; border-radius: 8px; 
+            text-align: center; font-weight: 700; display: none; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .coming-soon { text-align: center; padding: 100px 20px; color: #64748b; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo-text"><h1 id="welcomeTitle">DOMVEX</h1></div>
-    </header>
+<div class="header-bar">
+    <a href="index.html" class="back-btn">← Back</a>
+    <h2 id="serviceTitle" style="margin-left: 20px; font-size: 18px;">Services</h2>
+</div>
 
-    <div class="booking-container">
-        <h2>Book Your Service</h2>
-        <div class="caution-box"><strong>Caution:</strong> ₹149 visiting charge applies if no work is done.</div>
+<div class="service-banner"><h1 id="bannerName" style="font-size: 20px;">Loading...</h1></div>
+
+<div id="serviceContainer"></div>
+
+<div id="cartBtn" onclick="goToBooking()">View Booking</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get('category');
+    document.getElementById('serviceTitle').innerText = category;
+    document.getElementById('bannerName').innerText = category;
+
+    const services = {
+        "Electrician": [
+            { name: "Switch/Socket Repair", price: "₹119", img: "switch.jpg" }, { name: "Fan Installation", price: "₹179", img: "fan_install.jpg" }, { name: "Ceiling Fan Repair", price: "₹149", img: "fan_repair.jpg" }, { name: "Tube Light Fitting", price: "₹119", img: "tubelight.jpg" }, { name: "Door Bell Installation", price: "₹149", img: "doorbell.jpg" }, { name: "Exhaust Fan Installation", price: "₹179", img: "exhaust.jpg" }, { name: "Fault Finding Visit", price: "₹149", img: "fault.jpg" }, { name: "MCB Replacement", price: "₹249", img: "mcb.jpg" }, { name: "Minor Wiring Work", price: "₹349", img: "wiring.jpg" }, { name: "Geyser Installation", price: "₹399", img: "geyser.jpg" }, { name: "Inverter Installation", price: "₹599", img: "inverter.jpg" }
+        ],
+        "Plumber": [
+            { name: "Tap Repair", price: "₹119", img: "tap.jpg" }, { name: "Leakage Repair", price: "₹179", img: "leak.jpg" }, { name: "Flush Repair", price: "₹249", img: "flush.jpg" }, { name: "Drain Cleaning", price: "₹249", img: "drain.jpg" }, { name: "Wash Basin Fitting", price: "₹299", img: "basin.jpg" }, { name: "Jet Spray Installation", price: "₹149", img: "jetspray.jpg" }, { name: "Water Motor Checkup", price: "₹249", img: "motor_check.jpg" }, { name: "Water Motor Installation", price: "₹599", img: "motor_install.jpg" }, { name: "Water Tank Cleaning", price: "₹699", img: "tank_clean.jpg" }
+        ],
+        "AC Technician": [
+            { name: "AC Inspection", price: "₹149", img: "ac_inspect.jpg" }, { name: "AC General Service", price: "₹499", img: "ac_general.jpg" }, { name: "Foam Jet Service", price: "₹549", img: "ac_foam.jpg" }, { name: "Deep Cleaning", price: "₹699", img: "ac_deep.jpg" }, { name: "AC Installation", price: "₹899", img: "ac_install.jpg" }, { name: "AC Uninstallation", price: "₹499", img: "ac_uninstall.jpg" }, { name: "Water Leakage Fix", price: "₹349", img: "ac_leak.jpg" }, { name: "PCB Checkup", price: "₹299", img: "ac_pcb.jpg" }, { name: "Gas Refill", price: "₹2499+", img: "ac_gas.jpg" }
+        ],
+        "Cleaning": [
+            { name: "Bathroom Cleaning", price: "₹349", img: "bath_clean.jpg" }, { name: "Kitchen Cleaning", price: "₹699", img: "kitchen_clean.jpg" }, { name: "Sofa Cleaning", price: "₹599", img: "sofa_clean.jpg" }, { name: "Mattress Cleaning", price: "₹299", img: "mattress_clean.jpg" }, { name: "Tank Cleaning (Ext)", price: "₹699", img: "tank_clean_ext.jpg" }, { name: "Chimney Cleaning", price: "₹499", img: "chimney.jpg" }, { name: "1 BHK Deep Cleaning", price: "₹2499", img: "1bhk.jpg" }, { name: "2 BHK Deep Cleaning", price: "₹3499", img: "2bhk.jpg" }, { name: "3 BHK Deep Cleaning", price: "₹4999", img: "3bhk.jpg" }
+        ],
+        "Painting": [
+            { name: "Wall Touch-up", price: "₹399", img: "touchup.jpg" }, { name: "Single Accent Wall", price: "₹999", img: "accent.jpg" }, { name: "Room Painting", price: "₹2999", img: "room_paint.jpg" }, { name: "1 BHK Painting", price: "₹11999", img: "1bhk_paint.jpg" }, { name: "2 BHK Painting", price: "₹16999", img: "2bhk_paint.jpg" }, { name: "3 BHK Painting", price: "₹22999", img: "3bhk_paint.jpg" }, { name: "Putty Work", price: "₹12/sq ft", img: "putty.jpg" }, { name: "Texture Paint", price: "₹25/sq ft", img: "texture.jpg" }
+        ],
+        "Beauty/Spa": [
+            { name: "Hair Cut", price: "₹249", img: "haircut.jpg" }, { name: "Beard Styling", price: "₹149", img: "beard.jpg" }, { name: "Hair Spa", price: "₹699", img: "hairspa.jpg" }, { name: "Hair Smoothening", price: "₹2499", img: "smoothening.jpg" }, { name: "Facial", price: "₹599", img: "facial.jpg" }, { name: "Cleanup", price: "₹399", img: "cleanup.jpg" }, { name: "Full Arms Waxing", price: "₹299", img: "arms_wax.jpg" }, { name: "Full Legs Waxing", price: "₹499", img: "legs_wax.jpg" }, { name: "Manicure", price: "₹399", img: "mani.jpg" }, { name: "Pedicure", price: "₹499", img: "pedi.jpg" }, { name: "Threading", price: "₹49", img: "thread.jpg" }, { name: "Party Makeup", price: "₹1999", img: "party.jpg" }, { name: "Bridal Makeup", price: "₹5999+", img: "bridal.jpg" }
+        ],
+        "Laptop Repair": "coming-soon",
+        "Physiotherapist": "coming-soon"
+    };
+
+    let cart = [];
+
+    function toggleService(btn, name, price) {
+        const index = cart.findIndex(item => item.name === name);
+        if (index > -1) {
+            cart.splice(index, 1);
+            btn.innerText = "Add";
+            btn.classList.remove('added');
+        } else {
+            cart.push({ name, price });
+            btn.innerText = "Added";
+            btn.classList.add('added');
+        }
         
-        <form id="bookingForm">
-            <div class="form-group">
-                <label>Registered Mobile Number</label>
-                <input type="tel" id="bookPhone" style="background:#1f2937; color:white; padding:12px; width:100%; border:none; border-radius:8px;" readonly>
-            </div>
-            
-            <div class="form-group">
-                <label>Select Services (Check all that apply)</label>
-                <div id="serviceList" class="service-list"></div>
-            </div>
+        const cartBtn = document.getElementById('cartBtn');
+        if (cart.length > 0) {
+            cartBtn.style.display = 'block';
+            cartBtn.innerText = `View Booking (${cart.length} Items)`;
+        } else {
+            cartBtn.style.display = 'none';
+        }
+    }
 
-            <div class="form-group">
-                <label>Full Service Address</label>
-                <textarea id="bookAddress" rows="3" style="width:100%; padding:12px; background:#1f2937; color:white; border-radius:8px; border:1px solid #374151;" required></textarea>
-            </div>
-            <button type="submit" class="book-btn">Confirm Booking</button>
-        </form>
-    </div>
+    function goToBooking() {
+        localStorage.setItem('cartItems', JSON.stringify(cart));
+        window.location.href = 'booking_page.html';
+    }
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyCpoTdWajiA1rjX6AzIJ10hZ_EkW5YrmNE", databaseURL: "https://domvex-45097-default-rtdb.firebaseio.com/", projectId: "domvex-45097", storageBucket: "domvex-45097.firebasestorage.app", messagingSenderId: "317471334986", appId: "1:317471334986:web:c9f1a80e93ad1f13c93cb3" };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const database = firebase.database();
+    const container = document.getElementById('serviceContainer');
+    const data = services[category];
 
-        const serviceMap = {
-            "Electrician": {"Switch / Socket Repair": 119, "Fan Installation": 179, "Ceiling Fan Repair": 149, "Tube Light Fitting": 119, "Door Bell Installation": 149, "Exhaust Fan Installation": 179, "Fault Finding Visit": 149, "MCB Replacement": 249, "Minor Wiring Work": 349, "Geyser Installation": 399, "Inverter Installation": 599},
-            "Plumber": {"Tap Repair": 119, "Leakage Repair": 179, "Flush Repair": 249, "Drain Cleaning": 249, "Wash Basin Fitting": 299, "Jet Spray Installation": 149, "Water Motor Checkup": 249, "Water Motor Installation": 599, "Water Tank Cleaning": 699},
-            "AC Technician": {"AC Inspection": 149, "AC General Service": 499, "Foam Jet Service": 549, "Deep Cleaning": 699, "AC Installation": 899, "AC Uninstallation": 499, "Water Leakage Fix": 349, "PCB Checkup": 299, "Gas Refill": 2499},
-            "Cleaning": {"Bathroom Cleaning": 349, "Kitchen Cleaning": 699, "Sofa Cleaning": 599, "Mattress Cleaning": 299, "Water Tank Cleaning": 699, "Chimney Cleaning": 499, "1 BHK Deep Cleaning": 2499, "2 BHK Deep Cleaning": 3499, "3 BHK Deep Cleaning": 4999},
-            "Painting": {"Wall Touch-up": 399, "Single Accent Wall": 999, "Room Painting": 2999, "1 BHK Painting": 11999, "2 BHK Painting": 16999, "3 BHK Painting": 22999, "Putty Work (sq ft)": 12, "Texture Paint (sq ft)": 25},
-            "Laptop Repair": {"OS Install": 399, "Software Cleanup": 299, "Internal Cleaning": 399, "Thermal Paste": 499, "SSD Installation": 299, "RAM Installation": 299, "Screen Labour": 399, "Keyboard Labour": 349, "Full Health Checkup": 299},
-            "Beauty/Spa": {"Hair Cut": 249, "Beard Styling": 149, "Hair Spa": 699, "Hair Smoothening": 2499, "Facial": 599, "Cleanup": 399, "Full Arms Waxing": 299, "Full Legs Waxing": 499, "Manicure": 399, "Pedicure": 499, "Threading": 49, "Party Makeup": 1999, "Bridal Makeup": 5999},
-            "Carpentry": {"Furniture Repair": 249, "Door Lock Change": 199, "Hinge Repair": 149, "New Furniture Assembly": 499},
-            "Physiotherapist": {"Consultation": 499, "Session": 799, "Rehabilitation": 1299}
-        };
-
-        window.onload = function() {
-            const phone = localStorage.getItem('customerPhone');
-            if(!phone) { window.location.href = 'index.html'; return; }
-            document.getElementById('bookPhone').value = phone;
-            document.getElementById('welcomeTitle').innerText = "Hi, " + localStorage.getItem('customerName');
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const category = urlParams.get('category');
-            const listDiv = document.getElementById('serviceList');
-
-            if (category && serviceMap[category]) {
-                // 1. Saari specific services load karo
-                Object.entries(serviceMap[category]).forEach(([name, price]) => {
-                    listDiv.innerHTML += `
-                        <div class="service-item">
-                            <label><input type="checkbox" name="services" value="${name} (₹${price})"> ${name}</label>
-                            <span>₹${price}</span>
-                        </div>`;
-                });
-            }
-
-            // 2. "Other" option hamesha last mein add karo
-            listDiv.innerHTML += `
-                <div class="service-item">
-                    <label><input type="checkbox" name="services" value="Other Service"> Other Service</label>
-                    <span>As per inspection</span>
-                </div>`;
-        };
-
-        document.getElementById('bookingForm').onsubmit = function(e) {
-            e.preventDefault();
-            let selected = [];
-            document.querySelectorAll('input[name="services"]:checked').forEach(cb => selected.push(cb.value));
-            
-            if(selected.length === 0) { alert("Please select at least one service!"); return; }
-
-            const bookingId = "BK" + Date.now();
-            database.ref('bookings/' + bookingId).set({
-                customerName: localStorage.getItem('customerName'),
-                customerPhone: document.getElementById('bookPhone').value,
-                category: new URLSearchParams(window.location.search).get('category'),
-                services: selected.join(", "),
-                address: document.getElementById('bookAddress').value,
-                timestamp: new Date().toLocaleString(),
-                status: "Pending"
-            }, () => {
-                alert('Booking Confirmed!');
-                window.location.href = 'customer_dashboard.html';
-            });
-        };
-    </script>
+    if (data === "coming-soon") {
+        container.innerHTML = `<div class="coming-soon"><h2>🚀 Services Coming Soon!</h2><p>We are onboarding experts for ${category}.</p></div>`;
+    } else if (data) {
+        data.forEach(s => {
+            container.innerHTML += `
+                <div class="service-card">
+                    <div class="service-info">
+                        <h3>${s.name}</h3>
+                        <span class="price-tag">${s.price}</span>
+                    </div>
+                    <div class="img-container">
+                        <img src="${s.img}" class="service-img" onerror="this.src='https://via.placeholder.com/100'">
+                        <button class="add-btn" onclick="toggleService(this, '${s.name}', '${s.price}')">Add</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+</script>
 </body>
 </html>
