@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Worker Profile | Domvex</title>
+    <style>
+        body { background: #0b0f17; color: white; padding: 20px; font-family: sans-serif; }
+        .card { background: #111827; padding: 30px; border-radius: 12px; border: 1px solid #1f2937; max-width: 600px; margin: auto; }
+        .img-grid { display: flex; gap: 15px; margin-top: 15px; }
+        .img-grid img { width: 120px; height: 120px; border-radius: 8px; object-fit: cover; border: 1px solid #374151; }
+        .btn { padding: 10px 20px; background: #00d2ff; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; display: block; width: 100%; font-weight: bold; }
+        .data-row { margin: 10px 0; border-bottom: 1px solid #1f2937; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="card" id="profileContainer">
+        <h2>Loading Profile...</h2>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyCpoTdWajiA1rjX6AzIJ10hZ_EkW5YrmNE", databaseURL: "https://domvex-45097-default-rtdb.firebaseio.com/" };
+        firebase.initializeApp(firebaseConfig);
+        
+        const params = new URLSearchParams(window.location.search);
+        const phone = params.get('phone');
+
+        firebase.database().ref('workers/' + phone).once('value').then(snap => {
+            const w = snap.val();
+            if(!w) { document.getElementById('profileContainer').innerHTML = "Worker not found!"; return; }
+
+            // Calculations
+            let totalRating = 0, rateCount = 0;
+            if(w.ratings) { for(let id in w.ratings) { totalRating += parseFloat(w.ratings[id].rating); rateCount++; } }
+            let avgRating = rateCount > 0 ? (totalRating/rateCount).toFixed(1) : "0.0";
+            
+            document.getElementById('profileContainer').innerHTML = `
+                <h2>${w.name}</h2>
+                <div class="data-row"><strong>Phone:</strong> ${w.phone}</div>
+                <div class="data-row"><strong>Skill:</strong> ${w.skill}</div>
+                <div class="data-row"><strong>Rating:</strong> ⭐ ${avgRating}</div>
+                <div class="data-row"><strong>Total Jobs:</strong> ${w.jobsCount || 0}</div>
+                <div class="data-row"><strong>Today's Earning:</strong> ₹${w.todayEarnings || 0}</div>
+                <div class="data-row"><strong>Total Earnings:</strong> ₹${w.totalEarnings || 0}</div>
+                <hr style="margin:15px 0; border:0; border-top:1px solid #374151;">
+                <div class="data-row"><strong>Aadhaar Number:</strong> ${w.aadhaarNumber || 'Not Provided'}</div>
+                <div class="data-row"><strong>Bank Account Number:</strong> ${w.bankAccountNumber || 'Not Provided'}</div>
+                <div class="img-grid">
+                    <div><p>Worker:</p><img src="${w.workerPhoto}"></div>
+                    <div><p>Aadhaar:</p><img src="${w.aadhaarPhoto}"></div>
+                    <div><p>Bank:</p><img src="${w.bankPhoto}"></div>
+                </div>
+                <button class="btn" onclick="window.location.href='Working_earning.html?phone=${w.phone}'">View Earning History</button>
+            `;
+        });
+    </script>
+</body>
+</html>

@@ -6,27 +6,22 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #0b0f17; color: white; padding: 20px; }
-        
         #loginUI { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
         .login-box { background: #111827; padding: 40px; border-radius: 12px; border: 1px solid #1f2937; text-align: center; }
         input { padding: 12px; margin: 10px 0; width: 250px; background: #1f2937; border: 1px solid #374151; color: white; border-radius: 6px; }
         button { padding: 12px 24px; background: #00d2ff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
-
         .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
         .metric-card { background: #111827; padding: 25px; border-radius: 12px; border: 1px solid #1f2937; text-align: center; }
         table { width: 100%; border-collapse: collapse; background: #111827; border-radius: 12px; overflow: hidden; margin-bottom: 30px; }
         th { background: #1f2937; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #1f2937; cursor: pointer; }
-        .btn-act { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        td { padding: 15px; border-bottom: 1px solid #1f2937; }
+        .btn-act { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px; }
         .del { background: #ef4444; color: white; }
-        
-        /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
-        .modal-content { background: #111827; margin: 10% auto; padding: 20px; border: 1px solid #1f2937; width: 300px; border-radius: 12px; }
+        .modal-content { background: #111827; margin: 5% auto; padding: 20px; border: 1px solid #1f2937; width: 450px; border-radius: 12px; max-height: 80vh; overflow-y: auto; }
     </style>
 </head>
 <body>
-
     <div id="workerModal" class="modal">
         <div class="modal-content">
             <h2>Worker Profile</h2>
@@ -55,19 +50,13 @@
 
         <h2>Active Bookings</h2>
         <table>
-            <thead><tr><th>Booking ID</th><th>Customer</th><th>Service</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+            <thead><tr><th>Booking ID</th><th>Customer</th><th>Service</th><th>Assigned Worker</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
         </table>
 
-        <h2>Registered Customers</h2>
-        <table>
-            <thead><tr><th>Name</th><th>Mobile Number</th><th>Action</th></tr></thead>
-            <tbody id="customerTableBody"></tbody>
-        </table>
-        
         <h2>Registered Workers List</h2>
         <table>
-            <thead><tr><th>Name</th><th>Phone</th><th>Skill</th><th>Aadhaar</th><th>Rating</th><th>Action</th></tr></thead>
+            <thead><tr><th>Name</th><th>Phone</th><th>Skill</th><th>Status</th><th>Action</th></tr></thead>
             <tbody id="workerTableBody"></tbody>
         </table>
     </div>
@@ -89,48 +78,37 @@
 
         function showWorkerDetails(w) {
             document.getElementById('modalDetails').innerHTML = `
-                <p><strong>Name:</strong> ${w.name}</p>
-                <p><strong>Phone:</strong> ${w.phone}</p>
-                <p><strong>Aadhaar:</strong> ${w.aadhaar || '[Aadhaar Redacted]'}</p>
+                <p><strong>Name:</strong> ${w.name || 'N/A'}</p>
+                <p><strong>Phone:</strong> ${w.phone || 'N/A'}</p>
+                <p><strong>Aadhaar No:</strong> [Aadhaar Redacted]</p>
+                <p><strong>Bank Account:</strong> ${w.bankAccount || 'Not Provided'}</p>
                 <p><strong>Total Earnings:</strong> ₹${w.totalEarnings || 0}</p>
-                <p><strong>Total Jobs:</strong> ${w.jobsCount || 0}</p>
+                <hr style="margin:10px 0;">
+                <p><strong>Worker Photo:</strong><br><img src="${w.workerPhoto}" style="width:100px;"></p>
+                <p><strong>Aadhaar Photo:</strong><br><img src="${w.aadhaarPhoto}" style="width:100px;"></p>
+                <p><strong>Bank Photo:</strong><br><img src="${w.bankPhoto}" style="width:100px;"></p>
+                <a href="Working_earning.html?phone=${w.phone}" style="display:block; margin-top:15px; color:#00d2ff;">View Full Earning History</a>
             `;
             document.getElementById('workerModal').style.display = 'block';
         }
 
-        function warnWorker(workerKey, name) {
-            const ref = database.ref('workers/' + workerKey);
+        function verifyWorker(phone) { database.ref('workers/' + phone).update({ status: 'VERIFIED' }); alert("Worker Verified!"); }
+
+        function warnWorker(key, name) {
+            const ref = database.ref('workers/' + key);
             ref.once('value').then(snap => {
                 let w = snap.val();
                 let count = (w.warningCount || 0) + 1;
-                if (count >= 3) {
-                    banWorker(workerKey, name);
-                } else {
-                    ref.update({ warningCount: count });
-                    alert(name + " ko warning di gayi. Total Warnings: " + count);
-                }
+                if (count >= 3) { ref.update({ isBanned: true }); alert(name + " has been banned!"); } 
+                else { ref.update({ warningCount: count }); alert(name + " warned."); }
             });
         }
 
-        function banWorker(workerKey, name) {
-            if(confirm("Kya aap " + name + " ko permanently ban karna chahte hain?")) {
-                database.ref('workers/' + workerKey).update({ isBanned: true, banReason: "Violation of terms" })
-                .then(() => alert(name + " ab banned hai."));
-            }
-        }
+        function remove(path) { if(confirm("Sure, delete?")) database.ref(path).remove(); }
 
         function loadData() {
-            database.ref('customers').on('value', snap => {
-                const tbody = document.getElementById('customerTableBody');
-                tbody.innerHTML = '';
-                let count = 0;
-                snap.forEach(child => {
-                    count++;
-                    tbody.innerHTML += `<tr><td>${child.val().name}</td><td>${child.key}</td><td><button class="btn-act del" onclick="remove('customers/${child.key}')">Remove</button></td></tr>`;
-                });
-                document.getElementById('countCustomers').innerText = count;
-            });
-
+            database.ref('customers').on('value', snap => { document.getElementById('countCustomers').innerText = snap.numChildren(); });
+            
             database.ref('workers').on('value', snap => {
                 const tbody = document.getElementById('workerTableBody');
                 tbody.innerHTML = '';
@@ -138,41 +116,38 @@
                 snap.forEach(child => {
                     count++;
                     const w = child.val();
-                    let total = 0, rateCount = 0;
-                    if(w.ratings) {
-                        for(let id in w.ratings) {
-                            total += parseInt(w.ratings[id].rating);
-                            rateCount++;
-                        }
-                    }
-                    const avgRating = rateCount > 0 ? (total/rateCount).toFixed(1) : "0.0";
-
-                    const tr = document.createElement('tr');
-                    tr.onclick = () => showWorkerDetails(w);
-                    tr.innerHTML = `<td>${w.name}</td><td>${w.phone}</td><td>${w.skill}</td><td>${w.aadhaar || '[Aadhaar Redacted]'}</td><td>⭐ ${avgRating}</td><td>
-                        <button class="btn-act" style="background:#f59e0b; color:white; margin-right:5px;" onclick="event.stopPropagation(); warnWorker('${child.key}', '${w.name}')">Warn</button>
-                        <button class="btn-act del" onclick="event.stopPropagation(); banWorker('${child.key}', '${w.name}')">Ban</button>
-                        <button class="btn-act del" onclick="event.stopPropagation(); remove('workers/${child.key}')">Delete</button></td></tr>`;
-                    tbody.appendChild(tr);
+                    tbody.innerHTML += `<tr>
+                        <td>${w.name}</td><td>${w.phone}</td><td>${w.skill}</td>
+                        <td>${w.status === 'VERIFIED' ? '✅' : `<button onclick="verifyWorker('${child.key}')" style="background:green; color:white; border:none; padding:5px;">Verify</button>`}</td>
+                       // admin.html ke loadData function mein ye line change kar
+<td>
+    <button class="btn-act" onclick="window.location.href='worker_profile.html?phone=${w.phone}'">View</button>
+    <button class="btn-act" style="background:#f59e0b;" onclick="warnWorker('${child.key}', '${w.name}')">Warn</button>
+    <button class="btn-act del" onclick="remove('workers/${child.key}')">Del</button>
+</td>
+                    </tr>`;
                 });
                 document.getElementById('countWorkers').innerText = count;
             });
-            
+
             database.ref('bookings').on('value', snap => {
                 const tbody = document.getElementById('adminTableBody');
                 tbody.innerHTML = '';
-                let count = 0;
                 snap.forEach(child => {
-                    count++;
                     const b = child.val();
-                    // Date display add kar di hai niche
-                    tbody.innerHTML += `<tr><td>${b.bookingId || 'N/A'}</td><td>${b.customerName}</td><td>${b.service}</td><td>${b.date || 'N/A'}</td><td>${b.status}</td><td><button class="btn-act del" onclick="remove('bookings/${child.key}')">Delete</button></td></tr>`;
+                    tbody.innerHTML += `<tr>
+                        <td>${b.bookingId || 'N/A'}</td>
+                        <td>${b.customerName || 'N/A'}</td>
+                        <td>${b.service || 'N/A'}</td>
+                        <td>${b.workerName || b.assignedWorkerName || 'Not Assigned'}</td>
+                        <td>${b.date || 'N/A'}</td>
+                        <td>${b.status || 'Pending'}</td>
+                        <td><button class="btn-act del" onclick="remove('bookings/${child.key}')">Del</button></td>
+                    </tr>`;
                 });
-                document.getElementById('countBookings').innerText = count;
+                document.getElementById('countBookings').innerText = snap.numChildren();
             });
         }
-
-        function remove(path) { if(confirm("Sure, delete karna hai?")) database.ref(path).remove(); }
-   </script>
+    </script>
 </body>
 </html>

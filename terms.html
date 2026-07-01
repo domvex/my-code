@@ -28,6 +28,9 @@
     <h3>3. Performance-Based Commission</h3>
     <p>Our commission structure is dynamic and based on your performance. Maintaining a high customer rating is essential. Workers with consistently high ratings are eligible for lower commission slabs, allowing you to increase your earnings on every job.</p>
 
+    <h3>4. Material Selection & Liability</h3>
+    <p>If you are providing materials for a service, you must offer three options to the customer: <b>Premium, Standard, and Economical</b>. You are required to explain the quality and cost differences to the customer and obtain their approval before using any material. If any appliance is damaged or the service fails due to the use of inferior or unauthorized materials without customer consent, the full liability for the damage will rest solely on you, and the cost will be recovered from your earnings.</p>
+
     <button class="btn" onclick="acceptTerms()">I Accept & Complete Registration</button>
 </div>
 
@@ -44,6 +47,7 @@
             database.ref('workers/' + workerData.phone).set(workerData, () => {
                 localStorage.removeItem('tempWorkerData');
                 localStorage.setItem('workerPhone', workerData.phone);
+                localStorage.setItem('isRegistered', 'true'); // Flag set kiya
                 window.location.href = 'dashboard.html';
             });
         } else {

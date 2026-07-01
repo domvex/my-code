@@ -145,6 +145,18 @@
                 container.innerHTML += `<div class="card"><p><strong>${data.name}</strong> (${data.skill})</p></div>`;
             });
         });
+
+        // Terms check: Agar registered nahi hai toh wapas terms par bhej
+    if (localStorage.getItem('workerPhone') && !localStorage.getItem('isRegistered')) {
+        window.location.href = 'terms.html';
+    }
+
+    // Back button ka fix: Homepage par bhejne ke liye
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+        window.location.href = 'index.html';
+    };
+
     </script>
 </body>
 </html>
